@@ -19,4 +19,13 @@
         <ProjectReference Include="..\spotifete\spotifete.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <AndroidResource Update="Resources\mipmap-hdpi\spotifete_icon.png">
+            <SubType>Designer</SubType>
+        </AndroidResource>
+        <AndroidResource Update="Resources\drawable\spotifete_icon.png">
+            <SubType>Designer</SubType>
+        </AndroidResource>
+    </ItemGroup>
+
 </Project>
