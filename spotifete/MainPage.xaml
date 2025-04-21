@@ -39,12 +39,9 @@
                 SemanticProperties.Hint="Click for creating session screen"
                 Clicked="CreateSession_Clicked"
                 HorizontalOptions="Fill" />
-            <Button
-                x:Name="JoinSession"
-                Text="Join Session"
-                SemanticProperties.Hint="Click for joining session screen"
-                Clicked="JoinSession_Clicked"
-                HorizontalOptions="Fill" />
+            <Entry x:Name="SessionId"
+                   Placeholder="Enter Session ID"
+                   Completed="OnEnteredSessionID" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
