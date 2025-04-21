@@ -18,7 +18,10 @@ public partial class MainPage : ContentPage
     {
         var getListeningSessionApiResponse = await _listeningSession.GetListeningSessionAsync(SessionId.Text);
         if (getListeningSessionApiResponse.IsOk)
-            await Navigation.PushAsync(new CurrentSession(getListeningSessionApiResponse));
+        {
+            var fullListeningSession = getListeningSessionApiResponse.Ok();
+            await Navigation.PushAsync(new CurrentSession(fullListeningSession, _listeningSession));
+        }
     }
 
     private void CreateSession_Clicked(object sender, EventArgs e)

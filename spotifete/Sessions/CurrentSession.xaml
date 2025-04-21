@@ -2,14 +2,62 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="spotifete.Sessions.CurrentSession">
+             xmlns:model="clr-namespace:Org.OpenAPITools.Model"
+             xmlns:sessions="clr-namespace:spotifete.Sessions"
+             x:Class="spotifete.Sessions.CurrentSession"
+             x:DataType="sessions:CurrentSession">
     <VerticalStackLayout
         Padding="30,0"
         Margin="0,25">
+
         <Label
-            Text="{Binding ListeningSessionApiResponse}"
+            x:Name="SessionTitle"
             Style="{StaticResource Headline}"
             SemanticProperties.HeadingLevel="Level1" />
+        <Label
+            x:Name="SessionCode"
+            Style="{StaticResource SubHeadline}"
+            SemanticProperties.HeadingLevel="Level2" />
+
+        <ListView ItemsSource="{Binding CurrentQueue}">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="sessions:CurrentSession">
+                    <ViewCell>
+                        <Grid Padding="10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Image Grid.RowSpan="2"
+                                   Grid.Column="0"
+                                   WidthRequest="60"
+                                   HeightRequest="60"
+                                   Aspect="AspectFill"
+                                   x:DataType="model:SongRequest"
+                                   Source="{Binding TrackMetadata.AlbumImageThumbnailUrl}" />
+
+                            <Label Grid.Row="0"
+                                   Grid.Column="1"
+                                   x:DataType="model:SongRequest"
+                                   Text="{Binding TrackMetadata.TrackName}"
+                                   FontAttributes="Bold" />
+
+                            <Label Grid.Row="1"
+                                   Grid.Column="1"
+                                   x:DataType="model:SongRequest"
+                                   Text="{Binding TrackMetadata.ArtistName}"
+                                   FontAttributes="Italic"
+                                   VerticalOptions="End" />
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </VerticalStackLayout>
 
 </ContentPage>

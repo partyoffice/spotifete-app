@@ -40,7 +40,7 @@
                 Clicked="CreateSession_Clicked"
                 HorizontalOptions="Fill" />
             <Entry x:Name="SessionId"
-                   Placeholder="Enter Session ID"
+                   Placeholder="Enter Session ID to join Session"
                    Completed="OnEnteredSessionID" />
         </VerticalStackLayout>
     </ScrollView>
