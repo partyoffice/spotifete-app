@@ -290,9 +290,6 @@ namespace Org.OpenAPITools.Model
             if (title.IsSet && title.Value == null)
                 throw new ArgumentNullException(nameof(title), "Property is not nullable for class SimpleListeningSession.");
 
-            if (fallbackPlaylistId.IsSet && fallbackPlaylistId.Value == null)
-                throw new ArgumentNullException(nameof(fallbackPlaylistId), "Property is not nullable for class SimpleListeningSession.");
-
             if (fallbackPlaylistShuffle.IsSet && fallbackPlaylistShuffle.Value == null)
                 throw new ArgumentNullException(nameof(fallbackPlaylistShuffle), "Property is not nullable for class SimpleListeningSession.");
 
