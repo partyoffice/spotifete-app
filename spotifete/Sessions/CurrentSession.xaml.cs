@@ -8,10 +8,11 @@ namespace spotifete.Sessions;
 public partial class CurrentSession : ContentPage
 {
     private const double RefreshInterval = 5000;
+    private const int SearchedTracksLimit = 25;
     private readonly IListeningSessionApi _listeningSession;
     private readonly string _savedSessionId;
     private DateTime _lastSavedDateTime = DateTime.Now;
-    private Timer timer;
+    private Timer _timer = new();
 
     public CurrentSession(FullListeningSession fullListeningSession,
         IListeningSessionApi listeningSession)
@@ -29,6 +30,8 @@ public partial class CurrentSession : ContentPage
     }
 
     public ObservableCollection<SongRequest> CurrentQueue { get; private set; } = new();
+
+    public ObservableCollection<TrackMetaData> SearchedTracks { get; } = new();
 
     private async void UpdateQueueInformation()
     {
@@ -50,17 +53,45 @@ public partial class CurrentSession : ContentPage
         UpdateQueueInformation();
     }
 
+    private async void SearchForSongs(object sender, EventArgs e)
+    {
+        var currentSearchRequest = SearchedSong.Text;
+        if (!(currentSearchRequest.Length > 1))
+        {
+            SearchedTracks.Clear();
+            return;
+        }
+
+        var allSongsOfSearch =
+            await _listeningSession.SearchTrackAsync(_savedSessionId, currentSearchRequest, SearchedTracksLimit);
+        if (!allSongsOfSearch.IsOk) return;
+        SearchedTracks.Clear();
+        foreach (var item in allSongsOfSearch.Ok().Tracks) SearchedTracks.Add(item);
+    }
+
+    private async void AddSongToQueue(object sender, SelectedItemChangedEventArgs e)
+    {
+        var selectedTrack = e.SelectedItem as TrackMetaData;
+        var queue = await _listeningSession.RequestTrackAsync(_savedSessionId,
+            new RequestTrackRequest(" ", selectedTrack.SpotifyTrackId));
+        if (!queue.IsNoContent) return;
+
+        SearchedSong.Text = "";
+        SearchedTracks.Clear();
+        UpdateQueueInformation();
+    }
+
     private void SetTimer()
     {
-        timer = new Timer(RefreshInterval);
-        timer.Elapsed += (sender, e) => CheckForNeccessaryUpdate();
-        timer.AutoReset = true;
-        timer.Enabled = true;
+        _timer = new Timer(RefreshInterval);
+        _timer.Elapsed += (sender, e) => CheckForNeccessaryUpdate();
+        _timer.AutoReset = true;
+        _timer.Enabled = true;
     }
 
     protected override bool OnBackButtonPressed()
     {
-        timer.Stop();
+        _timer.Stop();
         return base.OnBackButtonPressed();
     }
 }
