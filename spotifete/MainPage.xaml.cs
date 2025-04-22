@@ -10,12 +10,14 @@ public partial class MainPage : ContentPage
 {
     private readonly IAuthenticationApi _authentication;
     private readonly IListeningSessionApi _listeningSession;
+    private readonly IUserApi _userApi;
 
     public MainPage()
     {
         InitializeComponent();
         _listeningSession = ApiHelper.Instance().ListeningSessionApi;
         _authentication = ApiHelper.Instance().AuthenticationApi;
+        _userApi = ApiHelper.Instance().UserApi;
     }
 
     private async void OnEnteredSessionID(object sender, EventArgs e)
@@ -29,7 +31,8 @@ public partial class MainPage : ContentPage
         if (getListeningSessionApiResponse.IsOk)
         {
             var fullListeningSession = getListeningSessionApiResponse.Ok();
-            await Navigation.PushAsync(new CurrentSession(fullListeningSession, _listeningSession));
+            await Navigation.PushAsync(new CurrentSession(fullListeningSession, _listeningSession, _authentication,
+                _userApi));
         }
     }
 
