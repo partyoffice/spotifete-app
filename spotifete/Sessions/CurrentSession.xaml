@@ -7,6 +7,21 @@
              x:Class="spotifete.Sessions.CurrentSession"
              x:DataType="sessions:CurrentSession">
 
+    <NavigationPage.TitleView>
+        <Button
+            x:Name="DeletionButton"
+            IsVisible="False"
+            Text="Close Session"
+            Margin="10,10"
+            BackgroundColor="Red"
+            TextColor="White"
+            FontAttributes="Bold"
+            HorizontalOptions="End"
+            VerticalOptions="Center"
+            HeightRequest="30"
+            Clicked="OnClickedDeleteSession" />
+    </NavigationPage.TitleView>
+
     <Grid RowDefinitions="Auto,Auto,Auto,*,*"
           Padding="30,0"
           Margin="0,25">
