@@ -27,8 +27,8 @@ public partial class CurrentSession : ContentPage
         _listeningSession = listeningSession;
         _authentication = authentication;
         _userApi = userApi;
-        _savedJoinId = fullListeningSession.JoinId == null ? " " : fullListeningSession.JoinId;
-        SessionTitle.Text = fullListeningSession.Title == null ? " " : fullListeningSession.Title;
+        _savedJoinId = fullListeningSession.JoinId ?? " ";
+        SessionTitle.Text = fullListeningSession.Title ?? " ";
         SessionCode.Text = "Session code: " + _savedJoinId;
 
         Init();
@@ -37,9 +37,9 @@ public partial class CurrentSession : ContentPage
         SetTimer();
     }
 
-    public ObservableCollection<SongRequest> CurrentQueue { get; private set; } = new();
+    public ObservableCollection<SongRequest> CurrentQueue { get; private set; } = [];
 
-    public ObservableCollection<TrackMetaData> SearchedTracks { get; } = new();
+    public ObservableCollection<TrackMetaData> SearchedTracks { get; } = [];
 
     public ICommand SessionCodeCopyCommand => new Command(OnClickedSessionCode);
 
@@ -64,23 +64,26 @@ public partial class CurrentSession : ContentPage
         var queueLastUpdatedAsync = await _listeningSession.GetSessionQueueAsync(_savedJoinId);
         if (!queueLastUpdatedAsync.IsOk) return;
         CurrentQueue.Clear();
-        foreach (var item in queueLastUpdatedAsync.Ok().Queue) CurrentQueue.Add(item);
+        var songRequests = queueLastUpdatedAsync.Ok()?.Queue;
+        if (songRequests == null) return;
+        foreach (var item in songRequests)
+            CurrentQueue.Add(item);
     }
 
     private async void CheckForNecessaryUpdate()
     {
         var lastUpdated = await _listeningSession.QueueLastUpdatedAsync(_savedJoinId);
 
-        var lastUpdatedDateTime = lastUpdated.Ok().QueueLastUpdated;
+        var lastUpdatedDateTime = lastUpdated.Ok()!.QueueLastUpdated;
         if (lastUpdated.IsNotFound)
         {
             _timer.Stop();
-            MainThread.BeginInvokeOnMainThread(BackToHomescreen);
+            MainThread.BeginInvokeOnMainThread(BackToHomeScreen);
         }
         else
         {
             if (_lastSavedDateTime.CompareTo(lastUpdatedDateTime) == 0) return;
-            _lastSavedDateTime = lastUpdatedDateTime.Value;
+            if (lastUpdatedDateTime != null) _lastSavedDateTime = lastUpdatedDateTime.Value;
             UpdateQueueInformation();
         }
     }
@@ -98,14 +101,17 @@ public partial class CurrentSession : ContentPage
             await _listeningSession.SearchTrackAsync(_savedJoinId, currentSearchRequest, SearchedTracksLimit);
         if (!allSongsOfSearch.IsOk) return;
         SearchedTracks.Clear();
-        foreach (var item in allSongsOfSearch.Ok().Tracks) SearchedTracks.Add(item);
+        var trackMetaDatas = allSongsOfSearch.Ok()?.Tracks;
+        if (trackMetaDatas == null) return;
+        foreach (var item in trackMetaDatas)
+            SearchedTracks.Add(item);
     }
 
     private async void AddSongToQueue(object sender, SelectedItemChangedEventArgs e)
     {
         var selectedTrack = e.SelectedItem as TrackMetaData;
         var queue = await _listeningSession.RequestTrackAsync(_savedJoinId,
-            new RequestTrackRequest(" ", selectedTrack.SpotifyTrackId));
+            new RequestTrackRequest(" ", selectedTrack?.SpotifyTrackId));
         if (!queue.IsNoContent) return;
 
         SearchedSong.Text = "";
@@ -124,7 +130,7 @@ public partial class CurrentSession : ContentPage
     private void SetTimer()
     {
         _timer = new Timer(RefreshInterval);
-        _timer.Elapsed += (sender, e) => CheckForNecessaryUpdate();
+        _timer.Elapsed += (_, _) => CheckForNecessaryUpdate();
         _timer.AutoReset = true;
         _timer.Enabled = true;
     }
@@ -137,10 +143,10 @@ public partial class CurrentSession : ContentPage
     private void OnClickedDeleteSession(object sender, EventArgs e)
     {
         DeleteCurrentSession();
-        BackToHomescreen();
+        BackToHomeScreen();
     }
 
-    private void BackToHomescreen()
+    private void BackToHomeScreen()
     {
         _timer.Stop();
         Navigation.PopAsync();

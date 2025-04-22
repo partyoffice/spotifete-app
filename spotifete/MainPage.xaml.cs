@@ -27,12 +27,14 @@ public partial class MainPage : ContentPage
 
     private async Task RedirectToCurrentSession(string sessionId)
     {
+        SessionId.Text = "";
         var getListeningSessionApiResponse = await _listeningSession.GetListeningSessionAsync(sessionId);
         if (getListeningSessionApiResponse.IsOk)
         {
             var fullListeningSession = getListeningSessionApiResponse.Ok();
-            await Navigation.PushAsync(new CurrentSession(fullListeningSession, _listeningSession, _authentication,
-                _userApi));
+            if (fullListeningSession != null)
+                await Navigation.PushAsync(new CurrentSession(fullListeningSession, _listeningSession, _authentication,
+                    _userApi));
         }
     }
 
@@ -42,6 +44,7 @@ public partial class MainPage : ContentPage
         if (!isAuthenticated) await CreateNewSession();
         var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SESSION_ID);
         var newSessionRequest = new NewListeningSessionRequest(sessionId, CreateSession.Text);
+        CreateSession.Text = "";
         var newSession = await _listeningSession.CreateNewListeningSessionAsync(newSessionRequest);
         var newSessionResponse = newSession.Ok();
         if (!newSession.IsOk || newSessionResponse == null) return;
