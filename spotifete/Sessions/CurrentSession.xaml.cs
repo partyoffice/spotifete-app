@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Model;
 using Timer = System.Timers.Timer;
@@ -32,6 +33,8 @@ public partial class CurrentSession : ContentPage
     public ObservableCollection<SongRequest> CurrentQueue { get; private set; } = new();
 
     public ObservableCollection<TrackMetaData> SearchedTracks { get; } = new();
+
+    public ICommand SessionCodeCopyCommand => new Command(OnClickedSessionCode);
 
     private async void UpdateQueueInformation()
     {
@@ -87,6 +90,11 @@ public partial class CurrentSession : ContentPage
         _timer.Elapsed += (sender, e) => CheckForNeccessaryUpdate();
         _timer.AutoReset = true;
         _timer.Enabled = true;
+    }
+
+    private async void OnClickedSessionCode()
+    {
+        await Clipboard.Default.SetTextAsync(_savedSessionId);
     }
 
     protected override bool OnBackButtonPressed()
