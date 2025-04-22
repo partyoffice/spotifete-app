@@ -14,6 +14,7 @@
                 x:Name="Login"
                 Text="Login to Spotify"
                 SemanticProperties.Hint="Click for logging in to Spotify"
+                Clicked="OnLoginClicked"
                 HorizontalOptions="End" />
 
             <Image
@@ -33,12 +34,10 @@
                 SemanticProperties.HeadingLevel="Level2"
                 SemanticProperties.Description="Willkommen in Spotifete" />
 
-            <Button
+            <Entry
                 x:Name="CreateSession"
-                Text="Create Session"
-                SemanticProperties.Hint="Click for creating session screen"
-                Clicked="CreateSession_Clicked"
-                HorizontalOptions="Fill" />
+                Placeholder="Enter session title to create session"
+                Completed="OnCompletedSessionTitle" />
             <Entry x:Name="SessionId"
                    Placeholder="Enter Session ID to join Session"
                    Completed="OnEnteredSessionID" />

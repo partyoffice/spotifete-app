@@ -332,17 +332,11 @@ namespace Org.OpenAPITools.Model
             if (title.IsSet && title.Value == null)
                 throw new ArgumentNullException(nameof(title), "Property is not nullable for class FullListeningSession.");
 
-            if (fallbackPlaylistId.IsSet && fallbackPlaylistId.Value == null)
-                throw new ArgumentNullException(nameof(fallbackPlaylistId), "Property is not nullable for class FullListeningSession.");
-
             if (fallbackPlaylistShuffle.IsSet && fallbackPlaylistShuffle.Value == null)
                 throw new ArgumentNullException(nameof(fallbackPlaylistShuffle), "Property is not nullable for class FullListeningSession.");
 
             if (owner.IsSet && owner.Value == null)
                 throw new ArgumentNullException(nameof(owner), "Property is not nullable for class FullListeningSession.");
-
-            if (fallbackPlaylistMetadata.IsSet && fallbackPlaylistMetadata.Value == null)
-                throw new ArgumentNullException(nameof(fallbackPlaylistMetadata), "Property is not nullable for class FullListeningSession.");
 
             return new FullListeningSession(id, active, ownerId, joinId, queuePlaylistId, title, fallbackPlaylistId, fallbackPlaylistShuffle, owner, fallbackPlaylistMetadata);
         }
