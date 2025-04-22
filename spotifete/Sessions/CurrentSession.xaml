@@ -18,7 +18,11 @@
         <Label Grid.Row="1"
                x:Name="SessionCode"
                Style="{StaticResource SubHeadline}"
-               SemanticProperties.HeadingLevel="Level2" />
+               SemanticProperties.HeadingLevel="Level2">
+            <Label.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding SessionCodeCopyCommand}" />
+            </Label.GestureRecognizers>
+        </Label>
         <Entry Grid.Row="2"
                x:Name="SearchedSong"
                Placeholder="Enter Songname to Search"
