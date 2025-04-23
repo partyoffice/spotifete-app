@@ -2,7 +2,10 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:spotifete="clr-namespace:spotifete"
+             xmlns:models="clr-namespace:spotifete.Models"
              x:Class="spotifete.MainPage"
+             x:DataType="spotifete:MainPage"
              NavigationPage.HasNavigationBar="False">
 
     <ScrollView>
@@ -41,6 +44,23 @@
             <Entry x:Name="SessionId"
                    Placeholder="Enter Session ID to join Session"
                    Completed="OnEnteredSessionID" />
+
+            <ListView
+                SelectionMode="None"
+                ItemTapped="OnSessionClicked"
+                ItemsSource="{Binding MyListenSessions}"
+                HasUnevenRows="True"
+                VerticalOptions="FillAndExpand"
+                SeparatorVisibility="Default">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Label x:DataType="models:SlimListeningSession"
+                                   Text="{Binding Name}" />
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

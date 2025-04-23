@@ -1,5 +1,7 @@
-﻿using Org.OpenAPITools.Api;
+using System.Collections.ObjectModel;
+using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Model;
+using spotifete.Models;
 using spotifete.Sessions;
 using spotifete.SpotifeteApi;
 using spotifete.Utils;
@@ -15,9 +17,33 @@ public partial class MainPage : ContentPage
     public MainPage()
     {
         InitializeComponent();
+        BindingContext = this;
         _listeningSession = ApiHelper.Instance().ListeningSessionApi;
         _authentication = ApiHelper.Instance().AuthenticationApi;
         _userApi = ApiHelper.Instance().UserApi;
+        UpdateOwnListeningSessions();
+    }
+
+    public ObservableCollection<SlimListeningSession> MyListenSessions { get; } = new();
+
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+        UpdateOwnListeningSessions();
+    }
+
+    private async void UpdateOwnListeningSessions()
+    {
+        var isAuthenticated = await AuthenticationUtil.isUserAuthenticated(_authentication);
+        if (!isAuthenticated) return;
+        var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SESSION_ID);
+        if (sessionId == null) return;
+        var currentUserResponse = await _userApi.GetCurrentUserAsync(sessionId);
+        var currentUser = currentUserResponse.Ok();
+        if (!currentUserResponse.IsOk || currentUser == null || currentUser.ListeningSessions == null) return;
+        MyListenSessions.Clear();
+        currentUser.ListeningSessions.ForEach(session =>
+            MyListenSessions.Add(new SlimListeningSession(session.Title, session.JoinId)));
     }
 
     private async void OnEnteredSessionID(object sender, EventArgs e)
@@ -86,5 +112,12 @@ public partial class MainPage : ContentPage
         var spotifeteSessionId = newSessionResponse.SpotifeteSessionId;
         if (spotifeteSessionId == null) return;
         await SecureStorage.Default.SetAsync(AuthenticationUtil.SESSION_ID, spotifeteSessionId);
+    }
+
+    private async void OnSessionClicked(object sender, ItemTappedEventArgs e)
+    {
+        var selectedListeningSession = e.Item as SlimListeningSession;
+        if (selectedListeningSession == null) return;
+        await RedirectToCurrentSession(selectedListeningSession.JoinId);
     }
 }
