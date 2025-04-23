@@ -41,6 +41,8 @@ public partial class CurrentSession : ContentPage
 
     public ObservableCollection<TrackMetaData> SearchedTracks { get; } = [];
 
+    public ObservableCollection<PlaylistMetadata> SearchedPlaylistsList { get; } = [];
+
     public ICommand SessionCodeCopyCommand => new Command(OnClickedSessionCode);
 
     private async void Init()
@@ -52,10 +54,12 @@ public partial class CurrentSession : ContentPage
         if (!getListeningSessionApiResponse.IsOk && !getCurrentUser.IsOk)
         {
             DeletionButton.IsVisible = false;
+            SearchedPlaylist.IsVisible = false;
+            ViewSearchedPlaylists.IsVisible = false;
             return;
         }
 
-        DeletionButton.IsVisible =
+        DeletionButton.IsVisible = SearchedPlaylist.IsVisible = ViewSearchedPlaylists.IsVisible =
             getListeningSessionApiResponse.Ok()?.Owner?.SpotifyId == getCurrentUser.Ok()?.SpotifyId;
     }
 
@@ -101,21 +105,51 @@ public partial class CurrentSession : ContentPage
             await _listeningSession.SearchTrackAsync(_savedJoinId, currentSearchRequest, SearchedTracksLimit);
         if (!allSongsOfSearch.IsOk) return;
         SearchedTracks.Clear();
-        var trackMetaDatas = allSongsOfSearch.Ok()?.Tracks;
-        if (trackMetaDatas == null) return;
-        foreach (var item in trackMetaDatas)
+        var trackMetaData = allSongsOfSearch.Ok()?.Tracks;
+        if (trackMetaData == null) return;
+        foreach (var item in trackMetaData)
             SearchedTracks.Add(item);
     }
 
-    private async void AddSongToQueue(object sender, SelectedItemChangedEventArgs e)
+    private async void AddSongToQueue(object sender, ItemTappedEventArgs e)
     {
-        var selectedTrack = e.SelectedItem as TrackMetaData;
+        var selectedTrack = e.Item as TrackMetaData;
         var queue = await _listeningSession.RequestTrackAsync(_savedJoinId,
             new RequestTrackRequest(" ", selectedTrack?.SpotifyTrackId));
         if (!queue.IsNoContent) return;
 
         SearchedSong.Text = "";
         SearchedTracks.Clear();
+        UpdateQueueInformation();
+    }
+
+    private async void SearchForPlaylist(object sender, EventArgs e)
+    {
+        var currentSearchRequest = SearchedPlaylist.Text;
+        if (!(currentSearchRequest.Length > 1))
+        {
+            SearchedPlaylistsList.Clear();
+            return;
+        }
+
+        var allPlaylistsOfSearch = await _listeningSession.SearchPlaylistAsync(_savedJoinId, currentSearchRequest);
+        if (!allPlaylistsOfSearch.IsOk) return;
+        SearchedPlaylistsList.Clear();
+        var playlistMetaData = allPlaylistsOfSearch.Ok()?.Playlists;
+        if (playlistMetaData == null) return;
+        foreach (var item in playlistMetaData) SearchedPlaylistsList.Add(item);
+    }
+
+    private async void AddPlaylistToBackground(object sender, ItemTappedEventArgs e)
+    {
+        var selectedPlaylist = e.Item as PlaylistMetadata;
+        var sessionId = SecureStorage.Default.GetAsync(AuthenticationUtil.SESSION_ID);
+        var queue = await _listeningSession.ChangeFallbackPlaylistAsync(_savedJoinId,
+            new ChangeFallbackPlaylistRequest(sessionId.Result, selectedPlaylist?.SpotifyPlaylistId));
+        if (!queue.IsNoContent) return;
+
+        SearchedPlaylist.Text = "";
+        SearchedPlaylistsList.Clear();
         UpdateQueueInformation();
     }
 
