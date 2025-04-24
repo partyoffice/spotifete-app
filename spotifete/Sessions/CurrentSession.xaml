@@ -22,7 +22,7 @@
             Clicked="OnClickedDeleteSession" />
     </NavigationPage.TitleView>
 
-    <Grid RowDefinitions="Auto,Auto,Auto,*,*"
+    <Grid RowDefinitions="Auto,Auto,Auto,*,*,Auto,*"
           Padding="30,0"
           Margin="0,25">
 
@@ -44,8 +44,8 @@
                TextChanged="SearchForSongs" />
 
         <ListView Grid.Row="3"
-                  SelectionMode="Single"
-                  ItemSelected="AddSongToQueue"
+                  SelectionMode="None"
+                  ItemTapped="AddSongToQueue"
                   ItemsSource="{Binding SearchedTracks}"
                   HasUnevenRows="True"
                   VerticalOptions="FillAndExpand"
@@ -138,6 +138,68 @@
                                    Text="{Binding TrackMetadata.ArtistName}"
                                    FontAttributes="Italic"
                                    VerticalOptions="End" />
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <Entry Grid.Row="5"
+               x:Name="SearchedPlaylist"
+               IsVisible="False"
+               Placeholder="Enter Playlistname to Search"
+               TextChanged="SearchForPlaylist" />
+
+        <ListView Grid.Row="6"
+                  SelectionMode="None"
+                  x:Name="ViewSearchedPlaylists"
+                  IsVisible="False"
+                  ItemTapped="AddPlaylistToBackground"
+                  ItemsSource="{Binding SearchedPlaylistsList}"
+                  HasUnevenRows="True"
+                  VerticalOptions="FillAndExpand"
+                  SeparatorVisibility="Default">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Grid Padding="10" RowSpacing="5">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="70" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Image Grid.RowSpan="2"
+                                   Grid.Column="0"
+                                   WidthRequest="60"
+                                   HeightRequest="60"
+                                   Aspect="AspectFill"
+                                   VerticalOptions="Center"
+                                   x:DataType="model:PlaylistMetadata"
+                                   Source="{Binding ImageThumbnailUrl}" />
+
+                            <Label Grid.Row="0"
+                                   Grid.Column="1"
+                                   x:DataType="model:PlaylistMetadata"
+                                   Text="{Binding Name}"
+                                   FontAttributes="Bold"
+                                   VerticalOptions="Start" />
+
+                            <Label Grid.Row="1"
+                                   Grid.Column="1"
+                                   x:DataType="model:PlaylistMetadata"
+                                   Text="{Binding OwnerName}"
+                                   FontAttributes="Italic"
+                                   VerticalOptions="End" />
+
+                            <Label Grid.Row="1"
+                                   Grid.Column="1"
+                                   IsVisible="False"
+                                   x:DataType="model:PlaylistMetadata"
+                                   Text="{Binding SpotifyPlaylistId}" />
                         </Grid>
                     </ViewCell>
                 </DataTemplate>
