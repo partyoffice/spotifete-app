@@ -114,8 +114,9 @@ public partial class CurrentSession : ContentPage
     private async void AddSongToQueue(object sender, ItemTappedEventArgs e)
     {
         var selectedTrack = e.Item as TrackMetaData;
+        var username = SecureStorage.Default.GetAsync(AuthenticationUtil.USERNAME);
         var queue = await _listeningSession.RequestTrackAsync(_savedJoinId,
-            new RequestTrackRequest(" ", selectedTrack?.SpotifyTrackId));
+            new RequestTrackRequest(username.Result, selectedTrack?.SpotifyTrackId));
         if (!queue.IsNoContent) return;
 
         SearchedSong.Text = "";
