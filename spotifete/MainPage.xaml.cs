@@ -25,7 +25,7 @@ public partial class MainPage : ContentPage
         UpdateOwnListeningSessions();
     }
 
-    public ObservableCollection<SlimListeningSession> MyListenSessions { get; } = new();
+    public ObservableCollection<SlimListeningSession> MyListenSessions { get; } = [];
 
     public ICommand EnterUsernameCommand => new Command(SetCorrectUsername);
 
@@ -37,26 +37,29 @@ public partial class MainPage : ContentPage
 
     private async void UpdateOwnListeningSessions()
     {
-        var username = await SecureStorage.Default.GetAsync(AuthenticationUtil.USERNAME);
+        var username = await SecureStorage.Default.GetAsync(AuthenticationUtil.Username);
         if (username != null) UserNameLabel.Text = username;
-        var isAuthenticated = await AuthenticationUtil.isUserAuthenticated(_authentication);
+        var isAuthenticated = await AuthenticationUtil.IsUserAuthenticated(_authentication);
         SetLoginButtonText(isAuthenticated);
         if (!isAuthenticated) return;
-        var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SESSION_ID);
+        var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SessionId);
         if (sessionId == null) return;
         var currentUserResponse = await _userApi.GetCurrentUserAsync(sessionId);
         var currentUser = currentUserResponse.Ok();
-        if (!currentUserResponse.IsOk || currentUser == null || currentUser.ListeningSessions == null) return;
+        if (!currentUserResponse.IsOk || currentUser?.ListeningSessions == null) return;
         MyListenSessions.Clear();
         currentUser.ListeningSessions.ForEach(session =>
-            MyListenSessions.Add(new SlimListeningSession(session.Title, session.JoinId)));
+        {
+            if (session is { Title: not null, JoinId: not null })
+                MyListenSessions.Add(new SlimListeningSession(session.Title, session.JoinId));
+        });
     }
 
     private async void CheckIfHasUsername()
     {
-        var isAuthenticated = await AuthenticationUtil.isUserAuthenticated(_authentication);
-        var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SESSION_ID);
-        var currentUsername = await SecureStorage.Default.GetAsync(AuthenticationUtil.USERNAME);
+        var isAuthenticated = await AuthenticationUtil.IsUserAuthenticated(_authentication);
+        var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SessionId);
+        var currentUsername = await SecureStorage.Default.GetAsync(AuthenticationUtil.Username);
         switch (isAuthenticated)
         {
             case false when currentUsername == null:
@@ -78,13 +81,13 @@ public partial class MainPage : ContentPage
                     return;
                 }
 
-                await SecureStorage.Default.SetAsync(AuthenticationUtil.USERNAME, spotifyDisplayName);
+                await SecureStorage.Default.SetAsync(AuthenticationUtil.Username, spotifyDisplayName);
                 UserNameLabel.Text = spotifyDisplayName;
                 break;
             }
             default:
             {
-                var username = await SecureStorage.Default.GetAsync(AuthenticationUtil.USERNAME);
+                var username = await SecureStorage.Default.GetAsync(AuthenticationUtil.Username);
                 if (username != null)
                     UserNameLabel.Text = username;
                 else
@@ -98,7 +101,7 @@ public partial class MainPage : ContentPage
     {
         var enteredUsername = await DisplayPromptAsync("Username", "Enter your username");
         if (string.IsNullOrEmpty(enteredUsername)) return;
-        await SecureStorage.Default.SetAsync(AuthenticationUtil.USERNAME, enteredUsername);
+        await SecureStorage.Default.SetAsync(AuthenticationUtil.Username, enteredUsername);
         UserNameLabel.Text = enteredUsername;
     }
 
@@ -124,9 +127,9 @@ public partial class MainPage : ContentPage
     private async void OnCompletedSessionTitle(object sender, EventArgs e)
     {
         CheckIfHasUsername();
-        var isAuthenticated = await AuthenticationUtil.isUserAuthenticated(_authentication);
+        var isAuthenticated = await AuthenticationUtil.IsUserAuthenticated(_authentication);
         if (!isAuthenticated) await CreateNewSession();
-        var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SESSION_ID);
+        var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SessionId);
         var newSessionRequest = new NewListeningSessionRequest(sessionId, CreateSession.Text);
         CreateSession.Text = "";
         var newSession = await _listeningSession.CreateNewListeningSessionAsync(newSessionRequest);
@@ -138,7 +141,7 @@ public partial class MainPage : ContentPage
 
     private async void OnLoginClicked(object sender, EventArgs e)
     {
-        if (!await AuthenticationUtil.isUserAuthenticated(_authentication))
+        if (!await AuthenticationUtil.IsUserAuthenticated(_authentication))
             await CreateNewSession();
         else
             LogoutFromSpotify();
@@ -182,27 +185,26 @@ public partial class MainPage : ContentPage
     {
         var spotifeteSessionId = newSessionResponse.SpotifeteSessionId;
         if (spotifeteSessionId == null) return;
-        await SecureStorage.Default.SetAsync(AuthenticationUtil.SESSION_ID, spotifeteSessionId);
+        await SecureStorage.Default.SetAsync(AuthenticationUtil.SessionId, spotifeteSessionId);
         var currentUserResponse = await _userApi.GetCurrentUserAsync(spotifeteSessionId);
         var spotifyDisplayName = currentUserResponse.Ok()?.SpotifyDisplayName;
         if (spotifyDisplayName != null)
         {
-            await SecureStorage.Default.SetAsync(AuthenticationUtil.USERNAME,
+            await SecureStorage.Default.SetAsync(AuthenticationUtil.Username,
                 spotifyDisplayName);
             UserNameLabel.Text = spotifyDisplayName;
         }
     }
 
-    private void DeleteSessionIdFromStorage()
+    private static void DeleteSessionIdFromStorage()
     {
-        SecureStorage.Default.Remove(AuthenticationUtil.SESSION_ID);
+        SecureStorage.Default.Remove(AuthenticationUtil.SessionId);
     }
 
     private async void OnSessionClicked(object sender, ItemTappedEventArgs e)
     {
         CheckIfHasUsername();
-        var selectedListeningSession = e.Item as SlimListeningSession;
-        if (selectedListeningSession == null) return;
+        if (e.Item is not SlimListeningSession selectedListeningSession) return;
         await RedirectToCurrentSession(selectedListeningSession.JoinId);
     }
 }

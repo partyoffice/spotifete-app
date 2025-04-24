@@ -73,7 +73,7 @@ public partial class CurrentSession : ContentPage
     private async void Init()
     {
         var getListeningSessionApiResponse = await _listeningSession.GetListeningSessionAsync(_savedJoinId);
-        var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SESSION_ID);
+        var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SessionId);
         if (sessionId == null) return;
         var getCurrentUser = await _userApi.GetCurrentUserAsync(sessionId);
         if (!getListeningSessionApiResponse.IsOk && !getCurrentUser.IsOk)
@@ -151,7 +151,7 @@ public partial class CurrentSession : ContentPage
     private async void AddSongToQueue(object sender, ItemTappedEventArgs e)
     {
         var selectedTrack = e.Item as TrackMetaData;
-        var username = await SecureStorage.Default.GetAsync(AuthenticationUtil.USERNAME);
+        var username = await SecureStorage.Default.GetAsync(AuthenticationUtil.Username);
         var queue = await _listeningSession.RequestTrackAsync(_savedJoinId,
             new RequestTrackRequest(username, selectedTrack?.SpotifyTrackId));
         if (!queue.IsNoContent) return;
@@ -195,7 +195,7 @@ public partial class CurrentSession : ContentPage
     private async void AddPlaylistToBackground(object sender, ItemTappedEventArgs e)
     {
         var selectedPlaylist = e.Item as PlaylistMetadata;
-        var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SESSION_ID);
+        var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SessionId);
         var queue = await _listeningSession.ChangeFallbackPlaylistAsync(_savedJoinId,
             new ChangeFallbackPlaylistRequest(sessionId, selectedPlaylist?.SpotifyPlaylistId));
         if (!queue.IsNoContent) return;
@@ -207,9 +207,9 @@ public partial class CurrentSession : ContentPage
 
     private async void DeleteCurrentSession()
     {
-        var isAuthenticated = await AuthenticationUtil.isUserAuthenticated(_authentication);
+        var isAuthenticated = await AuthenticationUtil.IsUserAuthenticated(_authentication);
         if (!isAuthenticated) return;
-        var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SESSION_ID);
+        var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SessionId);
         await _listeningSession.CloseListeningSessionAsync(_savedJoinId, new AuthenticatedRequest(sessionId));
     }
 
