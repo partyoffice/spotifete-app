@@ -35,6 +35,7 @@ public partial class MainPage : ContentPage
     private async void UpdateOwnListeningSessions()
     {
         var isAuthenticated = await AuthenticationUtil.isUserAuthenticated(_authentication);
+        SetLoginButtonText(isAuthenticated);
         if (!isAuthenticated) return;
         var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SESSION_ID);
         if (sessionId == null) return;
@@ -80,18 +81,31 @@ public partial class MainPage : ContentPage
 
     private async void OnLoginClicked(object sender, EventArgs e)
     {
-        await CreateNewSession();
+        if (!await AuthenticationUtil.isUserAuthenticated(_authentication))
+            await CreateNewSession();
+        else
+            LogoutFromSpotify();
+    }
+
+    private void LogoutFromSpotify()
+    {
+        DeleteSessionIdFromStorage();
+        MyListenSessions.Clear();
+        UpdateOwnListeningSessions();
     }
 
     private async Task CreateNewSession()
     {
-        var isAuthenticated = await AuthenticationUtil.isUserAuthenticated(_authentication);
-        if (isAuthenticated) return;
         var apiResponse = await _authentication.NewAuthenticationSessionAsync("/app");
         var newSessionResponse = apiResponse.Ok();
         if (!apiResponse.IsOk || newSessionResponse == null) return;
         await SaveSessionIdToStorage(newSessionResponse);
         await OpenBrowserForSpotify(newSessionResponse);
+    }
+
+    private void SetLoginButtonText(bool isAuthenticated)
+    {
+        Login.Text = isAuthenticated ? "Logout from Spotify" : "Login to Spotify";
     }
 
     private static async Task OpenBrowserForSpotify(NewAuthenticationSessionResponse newSessionResponse)
@@ -112,6 +126,11 @@ public partial class MainPage : ContentPage
         var spotifeteSessionId = newSessionResponse.SpotifeteSessionId;
         if (spotifeteSessionId == null) return;
         await SecureStorage.Default.SetAsync(AuthenticationUtil.SESSION_ID, spotifeteSessionId);
+    }
+
+    private void DeleteSessionIdFromStorage()
+    {
+        SecureStorage.Default.Remove(AuthenticationUtil.SESSION_ID);
     }
 
     private async void OnSessionClicked(object sender, ItemTappedEventArgs e)
