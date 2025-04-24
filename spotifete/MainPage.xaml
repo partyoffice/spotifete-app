@@ -5,20 +5,40 @@
              xmlns:spotifete="clr-namespace:spotifete"
              xmlns:models="clr-namespace:spotifete.Models"
              x:Class="spotifete.MainPage"
-             x:DataType="spotifete:MainPage"
-             NavigationPage.HasNavigationBar="False">
+             x:DataType="spotifete:MainPage">
+
+    <NavigationPage.TitleView>
+        <Grid ColumnDefinitions="*,Auto"
+              Padding="10,0"
+              VerticalOptions="Center">
+
+            <Label Grid.Column="0"
+                   x:Name="UserNameLabel"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Start">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding EnterUsernameCommand}" />
+                </Label.GestureRecognizers>
+            </Label>
+
+            <Button Grid.Column="1"
+                    x:Name="Login"
+                    Text="Login to Spotify"
+                    SemanticProperties.Hint="Click for logging in to Spotify"
+                    VerticalOptions="Center"
+                    HorizontalOptions="End"
+                    Clicked="OnLoginClicked" />
+
+        </Grid>
+    </NavigationPage.TitleView>
 
     <ScrollView>
         <VerticalStackLayout
             Padding="30,0"
             Margin="0,25"
             Spacing="25">
-            <Button
-                x:Name="Login"
-                Text="Login to Spotify"
-                SemanticProperties.Hint="Click for logging in/out to/of Spotify"
-                Clicked="OnLoginClicked"
-                HorizontalOptions="End" />
 
             <Image
                 Source="spotifete_logo.png"
