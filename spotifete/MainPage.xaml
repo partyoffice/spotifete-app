@@ -16,7 +16,7 @@
             <Button
                 x:Name="Login"
                 Text="Login to Spotify"
-                SemanticProperties.Hint="Click for logging in to Spotify"
+                SemanticProperties.Hint="Click for logging in/out to/of Spotify"
                 Clicked="OnLoginClicked"
                 HorizontalOptions="End" />
 
