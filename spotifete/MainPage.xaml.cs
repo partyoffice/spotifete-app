@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Model;
 using spotifete.Models;
@@ -23,6 +24,7 @@ public partial class MainPage : ContentPage
         _authentication = ApiHelper.Instance().AuthenticationApi;
         _userApi = ApiHelper.Instance().UserApi;
         UpdateOwnListeningSessions();
+        CheckForExceptions();
     }
 
     public ObservableCollection<SlimListeningSession> MyListenSessions { get; } = new();
@@ -204,5 +206,11 @@ public partial class MainPage : ContentPage
         var selectedListeningSession = e.Item as SlimListeningSession;
         if (selectedListeningSession == null) return;
         await RedirectToCurrentSession(selectedListeningSession.JoinId);
+    }
+
+    private void CheckForExceptions()
+    {
+        WeakReferenceMessenger.Default.Register<SessionWasClosedException>(this,
+            (_, _) => { SessionWasClosedException.DisplayAlert(this); });
     }
 }

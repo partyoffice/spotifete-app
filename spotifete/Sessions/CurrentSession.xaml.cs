@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Model;
+using spotifete.Exceptions;
 using spotifete.Utils;
 using Timer = System.Timers.Timer;
 
@@ -78,14 +80,14 @@ public partial class CurrentSession : ContentPage
     {
         var lastUpdated = await _listeningSession.QueueLastUpdatedAsync(_savedJoinId);
 
-        var lastUpdatedDateTime = lastUpdated.Ok()!.QueueLastUpdated;
         if (lastUpdated.IsNotFound)
         {
             _timer.Stop();
-            MainThread.BeginInvokeOnMainThread(BackToHomeScreen);
+            MainThread.BeginInvokeOnMainThread(() => BackToHomeScreen());
         }
         else
         {
+            var lastUpdatedDateTime = lastUpdated.Ok()!.QueueLastUpdated;
             if (_lastSavedDateTime.CompareTo(lastUpdatedDateTime) == 0) return;
             if (lastUpdatedDateTime != null) _lastSavedDateTime = lastUpdatedDateTime.Value;
             UpdateQueueInformation();
@@ -178,12 +180,13 @@ public partial class CurrentSession : ContentPage
     private void OnClickedDeleteSession(object sender, EventArgs e)
     {
         DeleteCurrentSession();
-        BackToHomeScreen();
+        BackToHomeScreen(true);
     }
 
-    private void BackToHomeScreen()
+    private void BackToHomeScreen(bool wasClosedInApp = false)
     {
         _timer.Stop();
+        if (!wasClosedInApp) WeakReferenceMessenger.Default.Send(new SessionWasClosedException());
         Navigation.PopAsync();
     }
 
