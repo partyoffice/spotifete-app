@@ -101,7 +101,6 @@ public partial class CurrentSession : ContentPage
     private async void CheckForNecessaryUpdate()
     {
         var lastUpdated = await _listeningSession.QueueLastUpdatedAsync(_savedJoinId);
-        var lastUpdatedDateTime = lastUpdated.Ok()!.QueueLastUpdated;
         if (lastUpdated.IsNotFound)
         {
             _timer.Stop();
@@ -109,6 +108,7 @@ public partial class CurrentSession : ContentPage
         }
         else
         {
+            var lastUpdatedDateTime = lastUpdated.Ok()!.QueueLastUpdated;
             if (_lastSavedDateTime.CompareTo(lastUpdatedDateTime) == 0) return;
             if (lastUpdatedDateTime != null)
                 _lastSavedDateTime = lastUpdatedDateTime.Value;
