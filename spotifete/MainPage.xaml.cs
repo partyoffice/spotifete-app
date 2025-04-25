@@ -3,6 +3,7 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Model;
+using spotifete.Exceptions;
 using spotifete.Models;
 using spotifete.Sessions;
 using spotifete.SpotifeteApi;
@@ -112,6 +113,7 @@ public partial class MainPage : ContentPage
 
     private async Task RedirectToCurrentSession(string sessionId)
     {
+        var sessionCode = SessionId.Text;
         SessionId.Text = "";
         var getListeningSessionApiResponse = await _listeningSession.GetListeningSessionAsync(sessionId);
         if (getListeningSessionApiResponse.IsOk)
@@ -120,6 +122,10 @@ public partial class MainPage : ContentPage
             if (fullListeningSession != null)
                 await Navigation.PushAsync(new CurrentSession(fullListeningSession, _listeningSession, _authentication,
                     _userApi));
+        }
+        else
+        {
+            SessionDoesNotExistException.DisplayAlert(this, sessionCode);
         }
     }
 
