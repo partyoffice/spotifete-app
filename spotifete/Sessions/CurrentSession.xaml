@@ -166,7 +166,8 @@
                   ItemsSource="{Binding CurrentQueue}"
                   HasUnevenRows="True"
                   VerticalOptions="FillAndExpand"
-                  SeparatorVisibility="Default">
+                  SeparatorVisibility="Default"
+                  ItemTapped="OpenSpotifySongLink">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ViewCell>
