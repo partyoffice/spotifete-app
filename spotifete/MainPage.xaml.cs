@@ -15,6 +15,8 @@ public partial class MainPage : ContentPage
     private readonly IListeningSessionApi _listeningSession;
     private readonly IUserApi _userApi;
 
+    private bool _isMySessionsRefreshing;
+
     public MainPage()
     {
         InitializeComponent();
@@ -25,14 +27,32 @@ public partial class MainPage : ContentPage
         UpdateOwnListeningSessions();
     }
 
+    public bool IsMySessionsRefreshing
+    {
+        get => _isMySessionsRefreshing;
+        set
+        {
+            if (_isMySessionsRefreshing == value) return;
+            _isMySessionsRefreshing = value;
+            OnPropertyChanged();
+        }
+    }
+
     public ObservableCollection<SlimListeningSession> MyListenSessions { get; } = [];
 
     public ICommand EnterUsernameCommand => new Command(SetCorrectUsername);
+    public ICommand RefreshMySessionsCommand => new Command(RefreshMySessionList);
 
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
         UpdateOwnListeningSessions();
+    }
+
+    private void RefreshMySessionList()
+    {
+        UpdateOwnListeningSessions();
+        IsMySessionsRefreshing = false;
     }
 
     private async void UpdateOwnListeningSessions()
@@ -41,6 +61,7 @@ public partial class MainPage : ContentPage
         if (username != null) UserNameLabel.Text = username;
         var isAuthenticated = await AuthenticationUtil.IsUserAuthenticated(_authentication);
         SetLoginButtonText(isAuthenticated);
+        MySessionsLabel.IsVisible = isAuthenticated;
         if (!isAuthenticated) return;
         var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SessionId);
         if (sessionId == null) return;
