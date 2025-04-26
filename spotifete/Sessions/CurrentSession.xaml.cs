@@ -243,4 +243,13 @@ public partial class CurrentSession : ContentPage
         _timer.Stop();
         return base.OnBackButtonPressed();
     }
+
+    private async void OpenSpotifySongLink(object sender, ItemTappedEventArgs e)
+    {
+        var spotifyTrackUrl = "https://open.spotify.com/track/";
+
+        if (e.Item is not SongRequest selectedTrack) return;
+        spotifyTrackUrl += selectedTrack.SpotifyTrackId;
+        await Browser.OpenAsync(new Uri(spotifyTrackUrl), BrowserLaunchMode.SystemPreferred);
+    }
 }
