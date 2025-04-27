@@ -25,6 +25,7 @@ public partial class MainPage : ContentPage
         _authentication = ApiHelper.Instance().AuthenticationApi;
         _userApi = ApiHelper.Instance().UserApi;
         UpdateOwnListeningSessions();
+        CheckIfHasUsername();
     }
 
     public bool IsMySessionsRefreshing
@@ -83,10 +84,10 @@ public partial class MainPage : ContentPage
         var currentUsername = await SecureStorage.Default.GetAsync(AuthenticationUtil.Username);
         switch (isAuthenticated)
         {
-            case false when currentUsername == null:
+            case false when string.IsNullOrWhiteSpace(currentUsername):
                 SetCorrectUsername();
                 break;
-            case true when currentUsername == null:
+            case true when string.IsNullOrWhiteSpace(currentUsername):
             {
                 if (sessionId == null)
                 {
@@ -108,20 +109,20 @@ public partial class MainPage : ContentPage
             }
             default:
             {
-                var username = await SecureStorage.Default.GetAsync(AuthenticationUtil.Username);
-                if (username != null)
-                    UserNameLabel.Text = username;
-                else
-                    SetCorrectUsername();
+                UserNameLabel.Text = currentUsername;
                 break;
             }
         }
-    }
+    } 
 
     private async void SetCorrectUsername()
     {
-        var enteredUsername = await DisplayPromptAsync("Username", "Enter your username");
-        if (string.IsNullOrEmpty(enteredUsername)) return;
+        var enteredUsername = await DisplayPromptAsync("Username", "Enter your username", "OK", null, null, 30);
+        if (string.IsNullOrWhiteSpace(enteredUsername))
+        {
+            CheckIfHasUsername();
+            return;
+        }
         await SecureStorage.Default.SetAsync(AuthenticationUtil.Username, enteredUsername);
         UserNameLabel.Text = enteredUsername;
     }

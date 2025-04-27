@@ -33,7 +33,6 @@
 
         </Grid>
     </NavigationPage.TitleView>
-
     <StackLayout
         Padding="30,0"
         Margin="0,25"
