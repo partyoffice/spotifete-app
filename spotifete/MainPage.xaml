@@ -33,38 +33,45 @@
 
         </Grid>
     </NavigationPage.TitleView>
+    <StackLayout
+        Padding="20,0"
+        Margin="0,25"
+        Spacing="25">
 
-    <ScrollView>
-        <VerticalStackLayout
-            Padding="30,0"
-            Margin="0,25"
-            Spacing="25">
+        <Image
+            Source="spotifete_logo.png"
+            x:Name="SpotifyLogoImage"
+            HeightRequest="185"
+            Aspect="AspectFit"
+            SemanticProperties.Description="Spotifete Logo" />
 
-            <Image
-                Source="spotifete_logo.png"
-                HeightRequest="185"
-                Aspect="AspectFit"
-                SemanticProperties.Description="Spotifete Logo" />
+        <Label
+            Text="Spotifete"
+            Style="{StaticResource Headline}"
+            SemanticProperties.HeadingLevel="Level1" />
 
-            <Label
-                Text="Spotifete"
-                Style="{StaticResource Headline}"
-                SemanticProperties.HeadingLevel="Level1" />
+        <Label
+            Text="Willkommen in Spotifete"
+            Style="{StaticResource SubHeadline}"
+            SemanticProperties.HeadingLevel="Level2"
+            SemanticProperties.Description="Willkommen in Spotifete" />
 
-            <Label
-                Text="Willkommen in Spotifete"
-                Style="{StaticResource SubHeadline}"
-                SemanticProperties.HeadingLevel="Level2"
-                SemanticProperties.Description="Willkommen in Spotifete" />
+        <Entry
+            x:Name="CreateSession"
+            Placeholder="Enter session title to create session"
+            Completed="OnCompletedSessionTitle" />
+        <Entry x:Name="SessionId"
+               Placeholder="Enter Session ID to join Session"
+               Completed="OnEnteredSessionID" />
 
-            <Entry
-                x:Name="CreateSession"
-                Placeholder="Enter session title to create session"
-                Completed="OnCompletedSessionTitle" />
-            <Entry x:Name="SessionId"
-                   Placeholder="Enter Session ID to join Session"
-                   Completed="OnEnteredSessionID" />
+        <Label x:Name="MySessionsLabel"
+               Text="My Sessions"
+               FontAttributes="Bold"
+               HorizontalOptions="Start" />
 
+        <RefreshView
+            IsRefreshing="{Binding IsMySessionsRefreshing}"
+            Command="{Binding RefreshMySessionsCommand}">
             <ListView
                 SelectionMode="None"
                 ItemTapped="OnSessionClicked"
@@ -75,12 +82,13 @@
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
-                            <Label x:DataType="models:SlimListeningSession"
+                            <Label MinimumHeightRequest="30" VerticalTextAlignment="Center"
+                                   x:DataType="models:SlimListeningSession"
                                    Text="{Binding Name}" />
                         </ViewCell>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-        </VerticalStackLayout>
-    </ScrollView>
+        </RefreshView>
+    </StackLayout>
 </ContentPage>

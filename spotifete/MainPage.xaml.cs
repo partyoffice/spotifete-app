@@ -15,6 +15,8 @@ public partial class MainPage : ContentPage
     private readonly IListeningSessionApi _listeningSession;
     private readonly IUserApi _userApi;
 
+    private bool _isMySessionsRefreshing;
+
     public MainPage()
     {
         InitializeComponent();
@@ -23,16 +25,35 @@ public partial class MainPage : ContentPage
         _authentication = ApiHelper.Instance().AuthenticationApi;
         _userApi = ApiHelper.Instance().UserApi;
         UpdateOwnListeningSessions();
+        CheckIfHasUsername();
+    }
+
+    public bool IsMySessionsRefreshing
+    {
+        get => _isMySessionsRefreshing;
+        set
+        {
+            if (_isMySessionsRefreshing == value) return;
+            _isMySessionsRefreshing = value;
+            OnPropertyChanged();
+        }
     }
 
     public ObservableCollection<SlimListeningSession> MyListenSessions { get; } = [];
 
     public ICommand EnterUsernameCommand => new Command(SetCorrectUsername);
+    public ICommand RefreshMySessionsCommand => new Command(RefreshMySessionList);
 
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
         UpdateOwnListeningSessions();
+    }
+
+    private void RefreshMySessionList()
+    {
+        UpdateOwnListeningSessions();
+        IsMySessionsRefreshing = false;
     }
 
     private async void UpdateOwnListeningSessions()
@@ -41,6 +62,7 @@ public partial class MainPage : ContentPage
         if (username != null) UserNameLabel.Text = username;
         var isAuthenticated = await AuthenticationUtil.IsUserAuthenticated(_authentication);
         SetLoginButtonText(isAuthenticated);
+        MySessionsLabel.IsVisible = isAuthenticated;
         if (!isAuthenticated) return;
         var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SessionId);
         if (sessionId == null) return;
@@ -62,10 +84,10 @@ public partial class MainPage : ContentPage
         var currentUsername = await SecureStorage.Default.GetAsync(AuthenticationUtil.Username);
         switch (isAuthenticated)
         {
-            case false when currentUsername == null:
+            case false when string.IsNullOrWhiteSpace(currentUsername):
                 SetCorrectUsername();
                 break;
-            case true when currentUsername == null:
+            case true when string.IsNullOrWhiteSpace(currentUsername):
             {
                 if (sessionId == null)
                 {
@@ -87,11 +109,7 @@ public partial class MainPage : ContentPage
             }
             default:
             {
-                var username = await SecureStorage.Default.GetAsync(AuthenticationUtil.Username);
-                if (username != null)
-                    UserNameLabel.Text = username;
-                else
-                    SetCorrectUsername();
+                UserNameLabel.Text = currentUsername;
                 break;
             }
         }
@@ -99,8 +117,13 @@ public partial class MainPage : ContentPage
 
     private async void SetCorrectUsername()
     {
-        var enteredUsername = await DisplayPromptAsync("Username", "Enter your username");
-        if (string.IsNullOrEmpty(enteredUsername)) return;
+        var enteredUsername = await DisplayPromptAsync("Username", "Enter your username", "OK", null, null, 30);
+        if (string.IsNullOrWhiteSpace(enteredUsername))
+        {
+            CheckIfHasUsername();
+            return;
+        }
+
         await SecureStorage.Default.SetAsync(AuthenticationUtil.Username, enteredUsername);
         UserNameLabel.Text = enteredUsername;
     }
@@ -206,5 +229,12 @@ public partial class MainPage : ContentPage
         CheckIfHasUsername();
         if (e.Item is not SlimListeningSession selectedListeningSession) return;
         await RedirectToCurrentSession(selectedListeningSession.JoinId);
+    }
+
+    protected override void OnSizeAllocated(double width, double height)
+    {
+        base.OnSizeAllocated(width, height);
+
+        SpotifyLogoImage.HeightRequest = height > 700 ? 185 : 75;
     }
 }
