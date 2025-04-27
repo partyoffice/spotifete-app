@@ -34,12 +34,13 @@
         </Grid>
     </NavigationPage.TitleView>
     <StackLayout
-        Padding="30,0"
+        Padding="20,0"
         Margin="0,25"
         Spacing="25">
 
         <Image
             Source="spotifete_logo.png"
+            x:Name="SpotifyLogoImage"
             HeightRequest="185"
             Aspect="AspectFit"
             SemanticProperties.Description="Spotifete Logo" />

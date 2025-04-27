@@ -113,7 +113,7 @@ public partial class MainPage : ContentPage
                 break;
             }
         }
-    } 
+    }
 
     private async void SetCorrectUsername()
     {
@@ -123,6 +123,7 @@ public partial class MainPage : ContentPage
             CheckIfHasUsername();
             return;
         }
+
         await SecureStorage.Default.SetAsync(AuthenticationUtil.Username, enteredUsername);
         UserNameLabel.Text = enteredUsername;
     }
@@ -228,5 +229,12 @@ public partial class MainPage : ContentPage
         CheckIfHasUsername();
         if (e.Item is not SlimListeningSession selectedListeningSession) return;
         await RedirectToCurrentSession(selectedListeningSession.JoinId);
+    }
+
+    protected override void OnSizeAllocated(double width, double height)
+    {
+        base.OnSizeAllocated(width, height);
+
+        SpotifyLogoImage.HeightRequest = height > 700 ? 185 : 75;
     }
 }
