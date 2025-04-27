@@ -82,7 +82,8 @@
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
-                            <Label x:DataType="models:SlimListeningSession"
+                            <Label MinimumHeightRequest="30" VerticalTextAlignment="Center"
+                                   x:DataType="models:SlimListeningSession"
                                    Text="{Binding Name}" />
                         </ViewCell>
                     </DataTemplate>
