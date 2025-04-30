@@ -65,11 +65,14 @@
                Completed="OnEnteredSessionID" />
 
         <Label x:Name="MySessionsLabel"
+               IsVisible="False"
                Text="My Sessions"
                FontAttributes="Bold"
                HorizontalOptions="Start" />
 
         <RefreshView
+            IsVisible="False"
+            x:Name="RefreshViewSessions"
             IsRefreshing="{Binding IsMySessionsRefreshing}"
             Command="{Binding RefreshMySessionsCommand}">
             <ListView

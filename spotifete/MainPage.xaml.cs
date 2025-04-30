@@ -62,7 +62,7 @@ public partial class MainPage : ContentPage
         if (username != null) UserNameLabel.Text = username;
         var isAuthenticated = await AuthenticationUtil.IsUserAuthenticated(_authentication);
         SetLoginButtonText(isAuthenticated);
-        MySessionsLabel.IsVisible = isAuthenticated;
+        RefreshViewSessions.IsVisible = MySessionsLabel.IsVisible = isAuthenticated;
         if (!isAuthenticated) return;
         var sessionId = await SecureStorage.Default.GetAsync(AuthenticationUtil.SessionId);
         if (sessionId == null) return;
