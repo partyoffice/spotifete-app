@@ -17,6 +17,7 @@ public partial class CurrentSession : ContentPage
     private readonly IUserApi _userApi;
     private bool _arePlaylistSearchResultsVisible;
     private bool _areSongSearchResultsVisible;
+    private bool _isMyQueueRefreshing;
     private DateTime _lastSavedDateTime = DateTime.Now;
     private Timer _timer = new();
 
@@ -48,6 +49,8 @@ public partial class CurrentSession : ContentPage
 
     public ICommand SessionCodeCopyCommand => new Command(OnClickedSessionCode);
 
+    public ICommand RefreshMyQueueCommand => new Command(RefreshMyQueueList);
+
     public bool AreSongSearchResultsVisible
     {
         get => _areSongSearchResultsVisible;
@@ -68,6 +71,23 @@ public partial class CurrentSession : ContentPage
             _arePlaylistSearchResultsVisible = value;
             OnPropertyChanged();
         }
+    }
+
+    public bool IsMyQueueRefreshing
+    {
+        get => _isMyQueueRefreshing;
+        set
+        {
+            if (_isMyQueueRefreshing == value) return;
+            _isMyQueueRefreshing = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private void RefreshMyQueueList()
+    {
+        CheckForNecessaryUpdate();
+        IsMyQueueRefreshing = false;
     }
 
     private async void Init()
@@ -145,7 +165,7 @@ public partial class CurrentSession : ContentPage
         foreach (var item in trackMetaData)
             SearchedTracks.Add(item);
 
-        AreSongSearchResultsVisible = true;
+        AreSongSearchResultsVisible = !string.IsNullOrWhiteSpace(SearchedSong.Text);
     }
 
     private async void AddSongToQueue(object sender, ItemTappedEventArgs e)
@@ -189,7 +209,7 @@ public partial class CurrentSession : ContentPage
         foreach (var item in playlistMetaData)
             SearchedPlaylistsList.Add(item);
 
-        ArePlaylistSearchResultsVisible = true;
+        ArePlaylistSearchResultsVisible = !string.IsNullOrWhiteSpace(SearchedPlaylistEntry.Text);
     }
 
     private async void AddPlaylistToBackground(object sender, ItemTappedEventArgs e)

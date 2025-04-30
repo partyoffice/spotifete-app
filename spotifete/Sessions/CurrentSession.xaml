@@ -161,49 +161,54 @@
             </ListView>
         </Border>
 
-        <ListView Grid.Row="6"
-                  SelectionMode="None"
-                  ItemsSource="{Binding CurrentQueue}"
-                  HasUnevenRows="True"
-                  VerticalOptions="FillAndExpand"
-                  SeparatorVisibility="Default"
-                  ItemTapped="OpenSpotifySongLink">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <ViewCell>
-                        <Grid Padding="10" RowSpacing="5">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="70" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Image Grid.RowSpan="2"
-                                   Grid.Column="0"
-                                   WidthRequest="60"
-                                   HeightRequest="60"
-                                   Aspect="AspectFill"
-                                   VerticalOptions="Center"
-                                   x:DataType="model:SongRequest"
-                                   Source="{Binding TrackMetadata.AlbumImageThumbnailUrl}" />
-                            <Label Grid.Row="0"
-                                   Grid.Column="1"
-                                   x:DataType="model:SongRequest"
-                                   Text="{Binding TrackMetadata.TrackName}"
-                                   FontAttributes="Bold"
-                                   VerticalOptions="Start" />
-                            <Label Grid.Row="1"
-                                   Grid.Column="1"
-                                   x:DataType="model:SongRequest"
-                                   Text="{Binding TrackMetadata.ArtistName}"
-                                   FontAttributes="Italic"
-                                   VerticalOptions="End" />
-                        </Grid>
-                    </ViewCell>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+        <RefreshView Grid.Row="6"
+                     IsRefreshing="{Binding IsMyQueueRefreshing}"
+                     Command="{Binding RefreshMyQueueCommand}">
+
+            <ListView
+                SelectionMode="None"
+                ItemsSource="{Binding CurrentQueue}"
+                HasUnevenRows="True"
+                VerticalOptions="FillAndExpand"
+                SeparatorVisibility="Default"
+                ItemTapped="OpenSpotifySongLink">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Grid Padding="10" RowSpacing="5">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="70" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Grid.RowSpan="2"
+                                       Grid.Column="0"
+                                       WidthRequest="60"
+                                       HeightRequest="60"
+                                       Aspect="AspectFill"
+                                       VerticalOptions="Center"
+                                       x:DataType="model:SongRequest"
+                                       Source="{Binding TrackMetadata.AlbumImageThumbnailUrl}" />
+                                <Label Grid.Row="0"
+                                       Grid.Column="1"
+                                       x:DataType="model:SongRequest"
+                                       Text="{Binding TrackMetadata.TrackName}"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Start" />
+                                <Label Grid.Row="1"
+                                       Grid.Column="1"
+                                       x:DataType="model:SongRequest"
+                                       Text="{Binding TrackMetadata.ArtistName}"
+                                       FontAttributes="Italic"
+                                       VerticalOptions="End" />
+                            </Grid>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </RefreshView>
     </Grid>
 </ContentPage>
